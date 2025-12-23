@@ -1,25 +1,20 @@
 <?php
 set_time_limit(0);
-$cookie = "/tmp/cookie.txt";
+$cookie = __DIR__ . "/cookie.txt"; // Path sahi kiya taaki error na aaye
 $base_url = "https://talkwin.ct.ws";
 
-// 1. Site par pehle jaakar Token aur Session nikaalna
+// 1. Site ka main page load karke session start karna
 $ch = curl_init("$base_url/index.php");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
-curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-$response = curl_exec($ch);
+curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36");
+curl_exec($ch);
 
-// Agar site koi hidden token maang rahi hai toh use dhoondhna
-preg_match('/name="token" value="(.*?)"/', $response, $matches);
-$token = isset($matches[1]) ? $matches[1] : '';
-
-// 2. Chat Room mein Enter karna (Name aur Age ke saath)
+// 2. Chat mein Enter hone ka step (Exactly jaisa site maangti hai)
 $entryData = [
-    'name'   => 'Ankit_Bot', // Aapka Nickname
-    'age'    => '25',        // Age
+    'name'   => 'Ankit_Bot',
+    'age'    => '25',
     'gender' => 'Male',
-    'token'  => $token,      // Token agar zaroori ho
     'enter'  => 'Enter'
 ];
 
@@ -27,26 +22,26 @@ curl_setopt($ch, CURLOPT_URL, "$base_url/index.php");
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($entryData));
 curl_exec($ch);
+curl_close($ch);
 
-// 3. Flood Loop (Delhi Lovers Room)
+// 3. Loop jo messages bhejega
 while(true) {
+    $ch = curl_init("$base_url/room.php?room=delhi_lovers_");
     $msgData = [
-        'msg'  => 'Bot_Testing_Active_🔥', // Aapka message
+        'msg'  => 'System_Testing_' . rand(10,99), // Message har baar badlega taaki spam filter na pakde
         'send' => 'Send'
     ];
 
-    $ch2 = curl_init("$base_url/room.php?room=delhi_lovers_");
-    curl_setopt($ch2, CURLOPT_POST, true);
-    curl_setopt($ch2, CURLOPT_POSTFIELDS, http_build_query($msgData));
-    curl_setopt($ch2, CURLOPT_COOKIEFILE, $cookie);
-    curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch2, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($msgData));
+    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     
-    $res = curl_exec($ch2);
-    curl_close($ch2);
+    $result = curl_exec($ch);
+    curl_close($ch);
 
-    echo "Sent! ";
-    usleep(2000000); // 2 second ka gap taaki site ban na kare
+    echo "Status: Sent! | "; // Render logs mein dikhega
+    sleep(3); // 3 second ka gap
 }
 ?>
-
